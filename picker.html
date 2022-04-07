@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+  <script type="text/javascript">
+
+    // var developerKey = '';                                         // Developer Key from Google Cloud Project.
+    var DIALOG_DIMENSIONS = {width: 1051, height: 650};                // The max dimensions for the dialog box is 1051,650.
+    var pickerApiLoaded = false;
+
+
+    // Use the Google API Loader script to load the google.picker script.
+    function onApiLoad() {
+      gapi.load('picker', {'callback': function() {
+        pickerApiLoaded = true;
+      }});
+    }
+
+    /**
+     * Gets the user's OAuth 2.0 access token from the server-side script so that
+     * it can be passed to Picker. This technique keeps Picker from needing to
+     * show its own authorization dialog, but is only possible if the OAuth scope
+     * that Picker needs is available in Apps Script. Otherwise, your Picker code
+     * will need to declare its own OAuth scopes.
+     */
+
+    function getOAuthToken() {
+      google.script.run.withSuccessHandler(createPicker)
+          .withFailureHandler(showError).getOAuthToken();
+    }
+
+    /**
+     * Creates a Picker that can access the user's folders.
+     *
+     * @param {string} token An OAuth 2.0 access token that lets Picker access the
+     *     file type specified in the addView call.
+     */
+
+    function createPicker(token) {
+      console.log(pickerApiLoaded,token)
+      if (pickerApiLoaded && token) {
+        var docsView = new google.picker.DocsView()
+          .setIncludeFolders(true)                                            // As we're copying folders, we want to include folders in the picker.
+          .setParent('root')                                                  // By setting the parent, we can see the directory properly. If not set, then we see ALL folders in one screen.
+          .setSelectFolderEnabled(true);                                      // Enables the user to select folders.
+          //.setMimeTypes('application/vnd.google-apps.folder')               // If we want, we can make it that ONLY folders are viewable.
+
+        var picker = new google.picker.PickerBuilder()
+            .addView(docsView)                                                // Adds the settings set above.
+            .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)         // Allows the user to select multiple folders at once. Disable this to only allow one folder at a time.
+            .enableFeature(google.picker.Feature.NAV_HIDDEN)                  // Removes the header. Disable to allow view of the header.
+            .enableFeature(google.picker.Feature.MINE_ONLY)                 // Only allows the person to view their own folders. Disable to allow shared folders (not shared drives).
+            .setSelectableMimeTypes('application/vnd.google-apps.folder')     // Only allows the selection of folders. Disable to allow all files and folders.
+            .hideTitleBar()                                                   // Hides title bar as it only takes up space.
+            .setOAuthToken(token)
+            //.setDeveloperKey(developerKey)
+            .setCallback(pickerCallback)
+            .setOrigin(google.script.host.origin)
+            .setSize(DIALOG_DIMENSIONS.width - 2,
+                DIALOG_DIMENSIONS.height - 2)                                 // Reducing width & height to see the border.
+            .build();
+        picker.setVisible(true);                                              // Make picker visible.
+      } else {
+        showError('Unable to load the file picker.');
+      }
+    }
+
+    /**
+     * A callback function that extracts the chosen document's metadata from the
+     * response object. For details on the response object, see
+     * https://developers.google.com/picker/docs/result
+     *
+     * @param {object} data The response object.
+     */
+
+    function pickerCallback(data) {
+      var action = data[google.picker.Response.ACTION];
+
+      // If a folder is picked...
+      if (action == google.picker.Action.PICKED) {
+        // Retrieve the documents.
+        var doc = data[google.picker.Response.DOCUMENTS];
+        var folderData = [];
+        for (var i = 0; i < doc.length ; i++) {
+          var id = doc[i][google.picker.Document.ID];           // Get document ID.
+          // var url = doc[i][google.picker.Document.URL];      // Get document URL.
+          var title = doc[i][google.picker.Document.NAME];      // Get document Name.
+          folderData.push([i, id, title, 'In Progress']);       // Add everything to an array -> Spot, ID, Name, Indicate transfer in Progress.
+        };
+        google.script.run.inProgress(folderData);               // Run inProgress() while using the array as a parameter. Displays all folders to be copied on the Spreadsheet.
+        google.script.run.copyFolders(folderData);              // Start copying folders while using the array as a parameter.
+        google.script.host.close();                             // Close the dialog box.
+      } else if (action == google.picker.Action.CANCEL) {
+        google.script.host.close();
+      }
+    }
+
+    /**
+     * Displays an error message within the #result element.
+     *
+     * @param {string} message The error message to display.
+     */
+    function showError(message) {
+      document.getElementById('result').innerHTML = message;
+      document.getElementById('AddInfo').innerHTML = 'You may need to reauthorize the script. Please click the button below to authenticate. Once completed, you may close the window and try again.';
+      document.getElementById('AuthButton').innerHTML = '<a href="https://script.google.com/macros/s/AKfycbzfeJSFaFgH-DyWr1Na_Fv7hTSscIo1w_ZOCwiO0qmmuTtg8rMRuv5y7-qtUqNlxJE/exec" target="_blank"><button>Authorize</button></a>';
+    }
+  </script>
+</head>
+<!-- Display the Picker as soon as the dialog loads. -->
+<body onload="getOAuthToken()">
+    <div>
+      <h1 id='result'></h1>
+      <p id='AddInfo'></p>
+      <p id='AuthButton'></p>
+    </div>
+    <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+</body>
+</html>
