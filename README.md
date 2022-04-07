@@ -1,7 +1,5 @@
-# Folder-Clone
-A Google Apps Script designed to allow the user to copy Google Drive folders, since Google doesn't allow it by default. Currently doesn't work because it needs to be published as an Add-on. 
-
-This is a script I created in order to solve one of Google Drive's most frustraing "non-feature": The inability to copy an entire folder. This document is already loaded with the script. You can easily just start using it in just a few clicks.
+# Folder Clone
+A Google Apps Script designed to allow the user to copy Google Drive folders. This is a script I created in order to solve one of Google Drive's most frustraing "non-feature": The inability to copy an entire folder. This document is already loaded with the script. You can easily just start using it in just a few clicks.
 
 What you can do with this script:
 
@@ -23,7 +21,7 @@ What it cannot do:
 
 Under the 'Add-ons' Menu, find Folder Clone, then choose Select Folders.
 
-The first time you run the script, it will ask you to authorize the application on two occasions: The first when you run the menu, and a second when you click on 'Select Folders'. It will warn you that it is unverified both times. This is normal! The script hasn't been verified by Google (It costs like $15,000). I do not log any of your personal info. The script requires access to your Google Drive in order to create copies for you. Click Advanced, and then Continue.
+The first time you run the script, it may ask you to authorize the application. It will warn you that it is unverified. This is normal! The script hasn't been verified by Google, and won't be until I release it as an Add-On. I do not log any of your personal info. The script requires access to your Google Drive in order to create copies for you. Click Advanced, and then Continue.
 
 Once you click on Select Folders, a dialog menu will appear. Wait a few more seconds and your Drive folder should appear. 
 
