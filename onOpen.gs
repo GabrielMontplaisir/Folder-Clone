@@ -33,20 +33,11 @@ function doGet(e) {
     // Display a first row when you show the picker.
     sh.appendRow( ['Folder Name', 'Progress', 'Destination', 'Link to Clone'] );
 
-    // if (PropertiesService.getUserProperties().getProperty('AUTHGRANTED') == 'true') {
-      // Display Google Picker
-      var html = HtmlService.createHtmlOutputFromFile('picker')
-        .setWidth(1051)
-        .setHeight(650)
-        .setSandboxMode(HtmlService.SandboxMode.IFRAME.ALLOWALL);
-      SpreadsheetApp.getUi().showModalDialog(html, 'Select a folder');
-    // } else {
-    //   var authHtml = HtmlService.createHtmlOutputFromFile('temp')
-    //     .setWidth(450)
-    //     .setHeight(150);
-    //   SpreadsheetApp.getUi().showModalDialog(authHtml,"Starting Authorization to Google Picker");
-    //   PropertiesService.getUserProperties().setProperty('AUTHGRANTED','true');
-    // }
+    var html = HtmlService.createHtmlOutputFromFile('picker')
+      .setWidth(1051)
+      .setHeight(650)
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME.ALLOWALL);
+    SpreadsheetApp.getUi().showModalDialog(html, 'Select a folder');
 
   } else {
     ss.getSheetByName('Folder Clone').activate();
